@@ -27,7 +27,7 @@ def create_app(config_name='development'):
     Returns:
         Flask app instance
     """
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='views')
     
     # Load configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
@@ -70,13 +70,13 @@ def create_app(config_name='development'):
     # Register blueprints (controllers)
     from app.controllers import auth, main, resources, bookings, messages, reviews, admin
     
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(main.bp)
-    app.register_blueprint(resources.bp)
-    app.register_blueprint(bookings.bp)
-    app.register_blueprint(messages.bp)
-    app.register_blueprint(reviews.bp)
-    app.register_blueprint(admin.bp)
+    app.register_blueprint(auth.auth_bp)
+    app.register_blueprint(main.main_bp)
+    app.register_blueprint(resources.resources_bp)
+    app.register_blueprint(bookings.bookings_bp)
+    app.register_blueprint(messages.messages_bp)
+    app.register_blueprint(reviews.reviews_bp)
+    app.register_blueprint(admin.admin_bp)
     
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
