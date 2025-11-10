@@ -208,6 +208,12 @@ CONVERSATION:
             try:
                 resource = ResourceDAL.get_resource_by_id(int(resource_id))
                 if resource:
+                    # Handle sqlite3.Row which doesn't have .get() method
+                    try:
+                        rating = resource['avg_rating'] if 'avg_rating' in resource.keys() else 0
+                    except:
+                        rating = 0
+                    
                     resources.append({
                         'resource_id': resource['resource_id'],
                         'title': resource['title'],
@@ -215,7 +221,7 @@ CONVERSATION:
                         'category': resource['category'],
                         'location': resource['location'],
                         'capacity': resource['capacity'],
-                        'rating': resource.get('avg_rating', 0)
+                        'rating': rating
                     })
             except Exception as e:
                 print(f"Error fetching resource {resource_id}: {e}")

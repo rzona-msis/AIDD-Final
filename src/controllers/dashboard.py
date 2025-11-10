@@ -140,7 +140,10 @@ def profile():
         form.name.data = current_user.name
         form.department.data = current_user.department
     
-    return render_template('dashboard/profile.html', form=form)
+    # Check if user has Google Calendar connected
+    has_calendar = UserDAL.has_calendar_connected(current_user.user_id)
+    
+    return render_template('dashboard/profile.html', form=form, has_calendar=has_calendar)
 
 
 @dashboard_bp.route('/change-password', methods=['GET', 'POST'])

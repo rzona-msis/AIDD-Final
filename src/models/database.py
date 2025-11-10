@@ -54,6 +54,9 @@ def init_database():
             role TEXT NOT NULL CHECK(role IN ('student', 'staff', 'admin')),
             profile_image TEXT,
             department TEXT,
+            google_calendar_token TEXT,
+            google_calendar_refresh_token TEXT,
+            google_calendar_token_expiry DATETIME,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -88,6 +91,7 @@ def init_database():
             status TEXT NOT NULL DEFAULT 'pending' 
                 CHECK(status IN ('pending', 'approved', 'rejected', 'cancelled', 'completed')),
             notes TEXT,
+            calendar_event_id TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (resource_id) REFERENCES resources(resource_id) ON DELETE CASCADE,
@@ -161,7 +165,7 @@ def init_database():
     conn.commit()
     conn.close()
     
-    print(f"✓ Database initialized successfully at {DATABASE_PATH}")
+    print(f"[OK] Database initialized successfully at {DATABASE_PATH}")
 
 
 def seed_sample_data():
@@ -243,7 +247,7 @@ def seed_sample_data():
     conn.commit()
     conn.close()
     
-    print("✓ Sample data seeded successfully")
+    print("[OK] Sample data seeded successfully")
     print("\nTest Accounts:")
     print("  Admin:   admin@university.edu / admin123")
     print("  Staff:   sjohnson@university.edu / staff123")
@@ -254,5 +258,5 @@ if __name__ == '__main__':
     print("Initializing Campus Resource Hub Database...")
     init_database()
     seed_sample_data()
-    print("\n✓ Database setup complete!")
+    print("\n[OK] Database setup complete!")
 

@@ -19,6 +19,9 @@ from src.controllers.messages import messages_bp
 from src.controllers.admin_panel import admin_bp
 from src.controllers.dashboard import dashboard_bp
 from src.controllers.ai_chatbot import ai_chatbot_bp
+from src.controllers.google_calendar import google_calendar_bp
+from src.controllers.analytics import analytics_bp
+from src.controllers.analytics_export import export_bp
 
 # Import models
 from src.data_access.user_dal import UserDAL
@@ -64,6 +67,9 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(ai_chatbot_bp, url_prefix='/ai')
+    app.register_blueprint(google_calendar_bp, url_prefix='/calendar')
+    app.register_blueprint(analytics_bp, url_prefix='/analytics')
+    app.register_blueprint(export_bp, url_prefix='/analytics/export')
     
     # Context processors - make variables available to all templates
     @app.context_processor
@@ -76,7 +82,8 @@ def create_app():
         
         return {
             'current_year': datetime.now().year,
-            'unread_message_count': unread_count
+            'unread_message_count': unread_count,
+            'ga_measurement_id': os.environ.get('GA_MEASUREMENT_ID', '')
         }
     
     # Error handlers

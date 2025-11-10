@@ -237,4 +237,102 @@ class UserDAL:
         conn.close()
         
         return stats
+    
+    @staticmethod
+    def update_user_calendar_tokens(user_id, token, refresh_token, token_expiry):
+        """
+        Update user's Google Calendar tokens.
+        
+        Args:
+            user_id (int): User ID
+            token (str): Access token
+            refresh_token (str): Refresh token
+            token_expiry (str): Token expiry datetime (ISO format)
+            
+        Returns:
+            bool: True if update successful
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            UPDATE users 
+            SET google_calendar_token = ?,
+                google_calendar_refresh_token = ?,
+                google_calendar_token_expiry = ?
+            WHERE user_id = ?
+        """, (token, refresh_token, token_expiry, user_id))
+        
+        success = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        
+        return success
+    
+    @staticmethod
+    def disconnect_user_calendar(user_id):
+        """
+        Remove user's Google Calendar tokens.
+        
+        Args:
+            user_id (int): User ID
+            
+        Returns:
+            bool: True if update successful
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            UPDATE users 
+            SET google_calendar_token = NULL,
+                google_calendar_refresh_token = NULL,
+                google_calendar_token_expiry = NULL
+            WHERE user_id = ?
+        """, (user_id,))
+        
+        success = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        
+        return success
+    
+    @staticmethod
+    def has_calendar_connected(user_id):
+        """
+        Check if user has connected their Google Calendar.
+        
+        Args:
+            user_id (int): User ID
+            
+        Returns:
+            bool: True if calendar is connected
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT google_calendar_token 
+            FROM users 
+            WHERE user_id = ?
+        """, (user_id,))
+        
+        result = cursor.fetchone()
+        conn.close()
+        
+        return result and result['google_calendar_token'] is not None
 
+
+# Module-level convenience functions
+create_user = UserDAL.create_user
+get_user_by_id = UserDAL.get_user_by_id
+get_user_by_email = UserDAL.get_user_by_email
+verify_password = UserDAL.verify_password
+get_all_users = UserDAL.get_all_users
+update_user = UserDAL.update_user
+update_password = UserDAL.update_password
+delete_user = UserDAL.delete_user
+get_user_statistics = UserDAL.get_user_statistics
+update_user_calendar_tokens = UserDAL.update_user_calendar_tokens
+disconnect_user_calendar = UserDAL.disconnect_user_calendar
+has_calendar_connected = UserDAL.has_calendar_connected

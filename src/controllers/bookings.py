@@ -129,6 +129,42 @@ def approve_booking(booking_id):
             BookingDAL.update_booking_status(booking_id, 'approved')
             flash('Booking approved successfully!', 'success')
             
+            # Create Google Calendar event if user has connected their calendar
+            from src.services.google_calendar_service import calendar_service
+            from src.data_access.user_dal import UserDAL
+            requester = UserDAL.get_user_by_id(booking['requester_id'])
+            
+            if requester and requester['google_calendar_token']:
+                try:
+                    credentials = calendar_service.get_credentials(
+                        requester['google_calendar_token'],
+                        requester['google_calendar_refresh_token'],
+                        requester['google_calendar_token_expiry']
+                    )
+                    
+                    if credentials:
+                        booking_data = {
+                            'booking_id': booking_id,
+                            'resource_title': booking['resource_title'],
+                            'location': booking['resource_location'],
+                            'category': booking['resource_category'],
+                            'capacity': booking['resource_capacity'],
+                            'start_datetime': booking['start_datetime'],
+                            'end_datetime': booking['end_datetime'],
+                            'status': 'approved',
+                            'notes': booking['notes']
+                        }
+                        
+                        event_id = calendar_service.create_booking_event(credentials, booking_data)
+                        
+                        if event_id:
+                            # Store event ID in booking
+                            BookingDAL.update_calendar_event_id(booking_id, event_id)
+                            flash('✓ Booking added to your Google Calendar!', 'info')
+                except Exception as e:
+                    print(f"Failed to create calendar event: {e}")
+                    # Don't fail the approval if calendar sync fails
+            
             # Log admin action if admin
             if current_user.is_admin():
                 from src.data_access.admin_dal import AdminDAL

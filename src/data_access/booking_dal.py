@@ -393,4 +393,31 @@ class BookingDAL:
         conn.close()
         
         return stats
+    
+    @staticmethod
+    def update_calendar_event_id(booking_id, calendar_event_id):
+        """
+        Update the Google Calendar event ID for a booking.
+        
+        Args:
+            booking_id (int): Booking ID
+            calendar_event_id (str): Google Calendar event ID
+            
+        Returns:
+            bool: True if update successful
+        """
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            UPDATE bookings 
+            SET calendar_event_id = ?
+            WHERE booking_id = ?
+        """, (calendar_event_id, booking_id))
+        
+        success = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        
+        return success
 
