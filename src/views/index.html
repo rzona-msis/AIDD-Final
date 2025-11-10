@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Welcome to Campus Resource Hub</h1>
+        <p class="lead mb-4">
+            Discover, book, and share campus resources effortlessly. From study rooms to lab equipment.
+        </p>
+        
+        <!-- Search Bar -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form action="{{ url_for('resources.list_resources') }}" method="GET" class="d-flex gap-2">
+                    <input type="text" name="keyword" class="form-control form-control-lg" 
+                           placeholder="Search resources (e.g., study room, projector)...">
+                    <button type="submit" class="btn btn-light btn-lg px-5">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        {% if not current_user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-2">
+                Get Started
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                Sign In
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Browse by Category</h2>
+    <div class="row g-3">
+        {% for category in categories %}
+        <div class="col-md-3 col-sm-6">
+            <a href="{{ url_for('resources.list_resources', category=category) }}" 
+               class="text-decoration-none">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-bookmark-fill fs-1 text-primary"></i>
+                        <h5 class="card-title mt-2">{{ category }}</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Recent Resources -->
+<div class="container mt-5">
+    <h2 class="mb-4">Recently Added</h2>
+    <div class="row g-4">
+        {% for resource in recent_resources %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <span class="badge bg-primary mb-2">{{ resource.category or 'Other' }}</span>
+                    <h5 class="card-title">{{ resource.title }}</h5>
+                    <p class="card-text text-muted">
+                        {{ (resource.description[:100] + '...') if resource.description and resource.description|length > 100 else resource.description }}
+                    </p>
+                    <p class="mb-1">
+                        <i class="bi bi-geo-alt"></i> {{ resource.location or 'Location TBD' }}
+                    </p>
+                    {% if resource.avg_rating and resource.avg_rating > 0 %}
+                    <p class="mb-0">
+                        <span class="rating-stars">
+                            {% for i in range(resource.avg_rating|int) %}★{% endfor %}
+                        </span>
+                        <small class="text-muted">({{ resource.review_count }} reviews)</small>
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                       class="btn btn-outline-primary btn-sm w-100">
+                        View Details <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{{ url_for('resources.list_resources') }}" class="btn btn-primary">
+            View All Resources <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Top Rated Resources -->
+{% if top_rated_resources %}
+<div class="container mt-5">
+    <h2 class="mb-4">Top Rated Resources</h2>
+    <div class="row g-4">
+        {% for resource in top_rated_resources %}
+        <div class="col-md-4">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-star-fill"></i> Top Rated
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ resource.title }}</h5>
+                    <p class="card-text text-muted">
+                        {{ (resource.description[:80] + '...') if resource.description and resource.description|length > 80 else resource.description }}
+                    </p>
+                    <p class="mb-0">
+                        <span class="rating-stars fs-5">
+                            {% for i in range(resource.avg_rating|round|int) %}★{% endfor %}
+                        </span>
+                        <strong>{{ "%.1f"|format(resource.avg_rating) }}</strong>
+                        <small class="text-muted">({{ resource.review_count }} reviews)</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                       class="btn btn-outline-success btn-sm w-100">
+                        View Resource
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Section -->
+<div class="container mt-5 mb-5">
+    <h2 class="text-center mb-5">Why Use Campus Resource Hub?</h2>
+    <div class="row g-4">
+        <div class="col-md-4 text-center">
+            <i class="bi bi-search fs-1 text-primary mb-3"></i>
+            <h4>Easy Discovery</h4>
+            <p class="text-muted">Find exactly what you need with powerful search and filters</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="bi bi-calendar-check fs-1 text-success mb-3"></i>
+            <h4>Simple Booking</h4>
+            <p class="text-muted">Reserve resources instantly with conflict detection</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="bi bi-star-fill fs-1 text-warning mb-3"></i>
+            <h4>Community Reviews</h4>
+            <p class="text-muted">Read reviews from other users to make informed decisions</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

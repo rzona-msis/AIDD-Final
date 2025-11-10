@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
 build/
 develop-eggs/
 dist/
@@ -19,17 +22,19 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv
+# Flask
+instance/
+.webassets-cache
 
-# Jupyter Notebook
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.flaskenv
 
 # IDEs
 .vscode/
@@ -37,61 +42,16 @@ env/
 *.swp
 *.swo
 *~
-.DS_Store
-
-# Data files (keep structure but not large data)
-data/raw/*.csv
-data/raw/*.xlsx
-data/raw/*.json
-data/processed/*.csv
-data/processed/*.xlsx
-data/processed/*.json
-*.db
-*.sqlite
-
-# Model files (can be large)
-models/*.pkl
-models/*.h5
-models/*.pt
-models/*.pth
-models/*.joblib
-models/*.onnx
-
-# Results and outputs
-results/*.png
-results/*.jpg
-results/*.pdf
-results/*.html
-
-# Logs
-*.log
-logs/
-
-# Environment variables
-.env
-.env.local
 
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
 
-# Temporary files
-*.tmp
-temp/
-tmp/
-
-# Documentation builds
-docs/_build/
-docs/_static/
-docs/_templates/
+# Uploads
+uploads/*
+!uploads/.gitkeep
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
-.tox/
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json

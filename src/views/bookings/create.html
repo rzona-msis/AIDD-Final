@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Create Booking{% if resource %} - {{ resource.title }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% if resource %}
+            <h1 class="mb-4"><i class="bi bi-calendar-check"></i> Book {{ resource.title }}</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Resource Details</h5>
+                    <p><strong>Location:</strong> {{ resource.location or 'TBD' }}</p>
+                    {% if resource.capacity %}
+                    <p><strong>Capacity:</strong> {{ resource.capacity }}</p>
+                    {% endif %}
+                    {% if resource.requires_approval %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        This resource requires approval. Your booking will be pending until approved.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        {{ form.resource_id }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.start_datetime.label(class="form-label") }}
+                                    {{ form.start_datetime(class="form-control" + (" is-invalid" if form.start_datetime.errors else "")) }}
+                                    {% if form.start_datetime.errors %}
+                                        <div class="invalid-feedback">{{ form.start_datetime.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.end_datetime.label(class="form-label") }}
+                                    {{ form.end_datetime(class="form-control" + (" is-invalid" if form.end_datetime.errors else "")) }}
+                                    {% if form.end_datetime.errors %}
+                                        <div class="invalid-feedback">{{ form.end_datetime.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="3", placeholder="Optional: describe your booking purpose") }}
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-calendar-check"></i> Request Booking
+                            </button>
+                            <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                Please select a resource to book.
+                <a href="{{ url_for('resources.list_resources') }}">Browse resources</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

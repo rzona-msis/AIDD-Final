@@ -1,316 +1,474 @@
-# AIDD Final Project
+# Campus Resource Hub
 
-[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-Educational-green.svg)](LICENSE)
+A full-stack web application for managing and booking campus resources including study rooms, equipment, lab spaces, and event venues.
 
-A comprehensive machine learning project for the AI in Data-Driven Decision Making (AIDD) course at Indiana University's MSIS program. This project demonstrates end-to-end implementation of AI/ML techniques including data preprocessing, exploratory analysis, model development, evaluation, and deployment considerations.
+**Course**: AI-Driven Development (AiDD) Final Project  
+**Due Date**: Friday, November 15, 2025  
+**Team**: Core Team (~4 students)
 
-## 📋 Table of Contents
-
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Methodology](#methodology)
-- [Results](#results)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
+---
 
 ## 🎯 Project Overview
 
-This project applies machine learning techniques to solve real-world business problems through data-driven decision making. The implementation showcases:
+Campus Resource Hub enables university departments, student organizations, and individuals to efficiently discover, share, and reserve campus resources. The system provides comprehensive features including real-time availability, booking management, user reviews, administrative moderation, and AI-powered assistance.
 
-- **Data Processing**: Comprehensive data cleaning, preprocessing, and feature engineering
-- **Exploratory Analysis**: Statistical analysis and visualization of patterns and relationships
-- **Model Development**: Implementation of multiple ML algorithms with comparison
-- **Model Evaluation**: Rigorous testing using appropriate metrics and cross-validation
-- **Best Practices**: Clean code, documentation, version control, and reproducibility
+### Key Features
 
-### Problem Statement
+✅ **User Management & Authentication**
+- Role-based access control (Student, Staff, Admin)
+- Secure password hashing with bcrypt
+- Session management with Flask-Login
 
-Organizations face increasing complexity in decision-making processes due to large data volumes, need for timely predictions, and limited capacity to analyze complex patterns. This project demonstrates how AI and machine learning can develop accurate predictive models that enable better business decisions.
+✅ **Resource Listings**
+- CRUD operations for resources
+- Rich metadata (title, description, category, location, capacity)
+- Lifecycle management (draft → published → archived)
 
-### Objectives
+✅ **Search & Discovery**
+- Keyword search across resources
+- Advanced filtering (category, location, date/time)
+- Multiple sort options (recent, top-rated, most booked)
 
-1. Perform comprehensive data collection, cleaning, and preprocessing
-2. Conduct exploratory data analysis to identify patterns and insights
-3. Develop and compare multiple machine learning models
-4. Evaluate and optimize model performance
-5. Provide actionable insights and recommendations
+✅ **Booking System**
+- Calendar-based booking interface
+- Real-time conflict detection
+- Approval workflows (automatic or manual)
+- Status tracking (pending → approved → completed)
 
-## ✨ Features
+✅ **Messaging**
+- Direct communication between users
+- Threaded conversations
+- Booking-specific message threads
 
-- **Modular Code Structure**: Well-organized, reusable Python modules
-- **Data Processing Pipeline**: Automated data loading, cleaning, and transformation
-- **Feature Engineering**: Advanced feature creation and selection techniques
-- **Multiple ML Models**: Implementation of various algorithms (Logistic Regression, Random Forest, Gradient Boosting, etc.)
-- **Comprehensive Evaluation**: Multiple metrics, confusion matrices, ROC curves
-- **Jupyter Notebooks**: Interactive analysis and visualization
-- **Documentation**: Detailed documentation of methodology and results
+✅ **Reviews & Ratings**
+- Post-booking review capability
+- 5-star rating system
+- Aggregate ratings and top-rated badges
 
-## 📁 Project Structure
+✅ **Admin Dashboard**
+- System-wide statistics and analytics
+- User and resource management
+- Content moderation
+- Audit logging
+
+---
+
+## 🏗️ Architecture
+
+### Technology Stack
+
+- **Backend**: Python 3.10+ with Flask
+- **Database**: SQLite (PostgreSQL-ready for production)
+- **Frontend**: Jinja2 templates + Bootstrap 5
+- **Authentication**: Flask-Login + bcrypt
+- **Testing**: pytest
+- **Version Control**: Git + GitHub
+
+### Application Architecture
+
+The application follows the **Model-View-Controller (MVC)** pattern with a dedicated **Data Access Layer (DAL)**:
 
 ```
-AIDD-Final/
-│
-├── data/                          # Data directory
-│   ├── raw/                       # Original, immutable data
-│   └── processed/                 # Cleaned, processed data
-│
-├── notebooks/                     # Jupyter notebooks
-│   ├── 01_exploratory_data_analysis.ipynb
-│   ├── 02_model_training.ipynb   # (To be created)
-│   └── 03_model_evaluation.ipynb # (To be created)
-│
-├── src/                           # Source code
-│   ├── data_loader.py            # Data loading utilities
-│   ├── data_cleaner.py           # Data cleaning functions
-│   ├── feature_engineering.py    # Feature engineering tools
-│   ├── model_trainer.py          # Model training pipeline
-│   └── model_evaluator.py        # Model evaluation tools
-│
-├── models/                        # Trained model files
-│   └── .gitkeep
-│
-├── results/                       # Results, figures, tables
-│   └── .gitkeep
-│
-├── docs/                          # Documentation
-│   ├── PROJECT_PROPOSAL.md       # Detailed project proposal
-│   ├── METHODOLOGY.md            # (To be created)
-│   └── SHORTCOMINGS.md           # Limitations and improvements
-│
-├── requirements.txt               # Python dependencies
-├── .gitignore                    # Git ignore rules
-└── README.md                     # This file
+src/
+├── controllers/        # Flask routes and blueprints
+│   ├── auth.py         # Authentication endpoints
+│   ├── resources.py    # Resource CRUD
+│   ├── bookings.py     # Booking management
+│   ├── messages.py     # Messaging system
+│   ├── dashboard.py    # User dashboard
+│   └── admin_panel.py  # Admin functions
+├── models/             # Data models
+│   ├── database.py     # Schema and initialization
+│   └── user.py         # User model for Flask-Login
+├── data_access/        # Data Access Layer (DAL)
+│   ├── user_dal.py     # User CRUD operations
+│   ├── resource_dal.py # Resource operations
+│   ├── booking_dal.py  # Booking operations
+│   ├── message_dal.py  # Messaging operations
+│   ├── review_dal.py   # Review operations
+│   └── admin_dal.py    # Admin operations
+├── views/              # Jinja2 HTML templates
+│   ├── base.html       # Base template
+│   ├── auth/           # Login, registration
+│   ├── resources/      # Resource views
+│   ├── bookings/       # Booking views
+│   ├── dashboard/      # User dashboard
+│   ├── messages/       # Messaging interface
+│   ├── admin/          # Admin panel
+│   └── errors/         # Error pages
+├── static/             # Static files (CSS, JS, images)
+├── forms.py            # WTForms form definitions
+└── app.py              # Flask application factory
 ```
 
-## 🚀 Installation
+---
+
+## 📊 Database Schema
+
+### Core Tables
+
+**users**
+- `user_id` (PK)
+- `name`, `email` (unique), `password_hash`
+- `role` (student/staff/admin)
+- `department`, `profile_image`, `created_at`
+
+**resources**
+- `resource_id` (PK)
+- `owner_id` (FK → users)
+- `title`, `description`, `category`, `location`, `capacity`
+- `images`, `availability_rules` (JSON)
+- `status` (draft/published/archived)
+- `requires_approval`, `created_at`
+
+**bookings**
+- `booking_id` (PK)
+- `resource_id` (FK → resources)
+- `requester_id` (FK → users)
+- `start_datetime`, `end_datetime`
+- `status` (pending/approved/rejected/cancelled/completed)
+- `notes`, `created_at`, `updated_at`
+
+**messages**
+- `message_id` (PK)
+- `thread_id`, `sender_id` (FK), `receiver_id` (FK)
+- `booking_id` (FK, optional)
+- `content`, `is_read`, `timestamp`
+
+**reviews**
+- `review_id` (PK)
+- `resource_id` (FK), `reviewer_id` (FK), `booking_id` (FK)
+- `rating` (1-5), `comment`, `is_hidden`, `timestamp`
+
+**admin_logs**
+- `log_id` (PK)
+- `admin_id` (FK), `action`, `target_table`, `target_id`
+- `details`, `timestamp`
+
+See `docs/ERD.png` for complete entity-relationship diagram.
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- pip (Python package installer)
+- Python 3.10 or higher
+- pip (Python package manager)
 - Git
 
-### Step 1: Clone the Repository
+### Installation
+
+1. **Clone the repository**
 
 ```bash
-git clone https://github.com/rzona-msis/AIDD-Final.git
-cd AIDD-Final
+git clone https://github.com/your-team/campus-resource-hub.git
+cd campus-resource-hub
 ```
 
-### Step 2: Create Virtual Environment (Recommended)
+2. **Create virtual environment**
 
-**On Windows:**
-```powershell
+```bash
+# Windows
 python -m venv venv
-.\venv\Scripts\activate
-```
+venv\Scripts\activate
 
-**On macOS/Linux:**
-```bash
+# macOS/Linux
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+3. **Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4: Verify Installation
+4. **Initialize the database**
+
+The database will be automatically initialized on first run with sample data.
+
+5. **Run the application**
 
 ```bash
-python -c "import pandas; import sklearn; import numpy; print('Installation successful!')"
+python run.py
 ```
 
-## 💻 Usage
-
-### Using Python Scripts
-
-#### 1. Load and Clean Data
-
-```python
-from src.data_loader import DataLoader
-from src.data_cleaner import DataCleaner
-
-# Load data
-loader = DataLoader(data_dir='data')
-df = loader.load_csv('your_data.csv')
-
-# Clean data
-cleaner = DataCleaner(df)
-cleaned_df = (cleaner
-              .standardize_column_names()
-              .remove_duplicates()
-              .handle_missing_values(strategy='median')
-              .get_cleaned_data())
-```
-
-#### 2. Engineer Features
-
-```python
-from src.feature_engineering import FeatureEngineer
-
-engineer = FeatureEngineer(cleaned_df)
-processed_df = (engineer
-                .encode_categorical(['category_col'], method='onehot')
-                .scale_features(['numeric_col'], method='standard')
-                .get_feature_data())
-```
-
-#### 3. Train Models
-
-```python
-from src.model_trainer import ModelTrainer
-
-# Initialize trainer
-trainer = ModelTrainer(task_type='classification')
-
-# Prepare data
-trainer.prepare_data(X, y, test_size=0.2)
-
-# Train multiple models
-trainer.train_multiple_models()
-
-# Cross-validate
-for model_name in trainer.models.keys():
-    trainer.cross_validate(model_name, cv=5)
-```
-
-#### 4. Evaluate Models
-
-```python
-from src.model_evaluator import ModelEvaluator
-
-evaluator = ModelEvaluator(task_type='classification')
-
-# Evaluate model
-metrics = evaluator.evaluate_classification(y_test, y_pred, y_pred_proba)
-
-# Compare models
-comparison = evaluator.compare_models()
-
-# Get best model
-best_model, best_score = evaluator.get_best_model('f1_score')
-```
-
-### Using Jupyter Notebooks
-
-1. Start Jupyter Notebook:
-```bash
-jupyter notebook
-```
-
-2. Navigate to `notebooks/` directory
-
-3. Open and run notebooks in order:
-   - `01_exploratory_data_analysis.ipynb` - EDA and data understanding
-   - `02_model_training.ipynb` - Model development
-   - `03_model_evaluation.ipynb` - Results and evaluation
-
-## 🔬 Methodology
-
-### 1. Data Collection & Preparation
-- Data sourcing and loading
-- Data quality assessment
-- Handling missing values and outliers
-- Data type conversions
-
-### 2. Exploratory Data Analysis (EDA)
-- Statistical summaries
-- Distribution analysis
-- Correlation analysis
-- Feature relationships
-- Target variable analysis
-
-### 3. Feature Engineering
-- Categorical encoding (One-Hot, Label)
-- Numerical scaling (Standard, MinMax)
-- Feature creation (Polynomial, Interactions)
-- Feature selection
-
-### 4. Model Development
-- Train/test split
-- Baseline model establishment
-- Multiple algorithm implementation:
-  - Linear models
-  - Tree-based models (Decision Tree, Random Forest)
-  - Ensemble methods (Gradient Boosting)
-  - Support Vector Machines
-  - K-Nearest Neighbors
-- Hyperparameter tuning
-- Cross-validation
-
-### 5. Model Evaluation
-- Performance metrics calculation
-- Confusion matrix analysis
-- ROC curve and AUC
-- Model comparison
-- Final model selection
-
-## 📊 Results
-
-Results will be documented in the `results/` directory and include:
-
-- Model performance comparison tables
-- Confusion matrices and ROC curves
-- Feature importance visualizations
-- Final model metrics and insights
-- Business recommendations
-
-*(Results will be generated after running the analysis)*
-
-## 📚 Documentation
-
-Detailed documentation is available in the `docs/` directory:
-
-- **[PROJECT_PROPOSAL.md](docs/PROJECT_PROPOSAL.md)**: Comprehensive project proposal including objectives, methodology, timeline, and expected outcomes
-- **METHODOLOGY.md**: Detailed methodology and technical approach *(to be created)*
-- **[SHORTCOMINGS.md](docs/SHORTCOMINGS.md)**: Known limitations, assumptions, and areas for improvement
-
-Additional documentation:
-- Code documentation via docstrings in all modules
-- Inline comments for complex logic
-- Jupyter notebooks with markdown explanations
-
-## 🤝 Contributing
-
-This is an academic project for the AIDD course. However, suggestions and feedback are welcome:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Commit your changes (`git commit -am 'Add improvement'`)
-4. Push to the branch (`git push origin feature/improvement`)
-5. Create a Pull Request
-
-## 👥 Author
-
-**[Your Name]**
-- Course: AI in Data-Driven Decision Making (AIDD)
-- Institution: Indiana University - Master of Science in Information Systems (MSIS)
-- Date: November 2025
-
-## 📄 License
-
-This project is for educational purposes as part of the AIDD course at Indiana University.
-
-## 🙏 Acknowledgments
-
-- Indiana University MSIS Program
-- AIDD Course Instructors
-- Open-source community for the excellent libraries used in this project
-
-## 📞 Contact
-
-For questions or feedback regarding this project:
-- GitHub Issues: [Create an issue](https://github.com/rzona-msis/AIDD-Final/issues)
-- Email: [Your email]
+The application will be available at: **http://localhost:5000**
 
 ---
 
-**Last Updated:** November 9, 2025
+## 👥 Test Accounts
+
+The system is pre-seeded with test accounts:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@university.edu | admin123 |
+| **Staff** | sjohnson@university.edu | staff123 |
+| **Student** | asmith@university.edu | student123 |
+
+---
+
+## 🧪 Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_user_dal.py
+
+# Run with coverage
+pytest --cov=src tests/
+```
+
+### Test Coverage
+
+- ✅ Unit tests for Data Access Layer (user, booking, resource)
+- ✅ Integration tests for authentication flow
+- ✅ Booking conflict detection tests
+- ✅ Security validation tests
+
+---
+
+## 🔒 Security Features
+
+### Implemented Security Measures
+
+✅ **Password Security**
+- Bcrypt hashing with salt (12 rounds)
+- No plaintext passwords in database or logs
+
+✅ **Input Validation**
+- Server-side validation for all inputs
+- WTForms with custom validators
+- Type checking and length limits
+
+✅ **CSRF Protection**
+- CSRF tokens on all forms
+- Flask-WTF integration
+
+✅ **SQL Injection Prevention**
+- Parameterized queries throughout
+- No raw SQL with user input
+
+✅ **XSS Protection**
+- Template auto-escaping enabled
+- Content Security Policy headers
+
+✅ **Authentication & Authorization**
+- Session-based authentication
+- Role-based access control
+- Protected routes with decorators
+
+✅ **File Upload Security**
+- File type validation
+- Size limits enforced
+- Secure filename handling
+
+---
+
+## 🤖 AI-First Development
+
+This project was developed using AI-first methodologies as part of the AiDD curriculum.
+
+### AI Tools Used
+
+- **Cursor AI**: Primary development assistant
+- **GitHub Copilot**: Code completion and suggestions
+- **Context Management**: Structured prompts and context packs
+
+### AI Documentation
+
+All AI interactions are documented in:
+- `.prompt/dev_notes.md` - Complete log of AI assistance
+- `.prompt/golden_prompts.md` - Most effective prompts
+
+### Context Pack Structure
+
+```
+docs/context/
+├── APA/       # Agility, Processes & Automation artifacts
+├── DT/        # Design Thinking (personas, journey maps)
+├── PM/        # Product Management (PRD, OKRs)
+└── shared/    # Common items (glossary, personas)
+```
+
+This structure enables AI tools to:
+- Understand project requirements and user needs
+- Generate contextually appropriate code
+- Make informed architectural decisions
+- Produce accurate documentation
+
+---
+
+## 📝 API Endpoints
+
+### Authentication
+- `POST /auth/register` - Create new user account
+- `POST /auth/login` - Authenticate user
+- `GET /auth/logout` - End user session
+
+### Resources
+- `GET /resources/` - List and search resources
+- `GET /resources/<id>` - View resource details
+- `POST /resources/create` - Create new resource
+- `PUT /resources/<id>/edit` - Update resource
+- `DELETE /resources/<id>/delete` - Delete resource
+
+### Bookings
+- `POST /bookings/create` - Request booking
+- `GET /bookings/<id>` - View booking details
+- `POST /bookings/<id>/approve` - Approve booking
+- `POST /bookings/<id>/reject` - Reject booking
+- `POST /bookings/<id>/cancel` - Cancel booking
+
+### Messages
+- `GET /messages/` - List message threads
+- `GET /messages/thread/<thread_id>` - View conversation
+- `POST /messages/send` - Send message
+
+### Dashboard
+- `GET /dashboard/` - User dashboard
+- `GET /dashboard/my-resources` - User's resources
+- `GET /dashboard/my-bookings` - User's bookings
+- `GET /dashboard/profile` - Profile settings
+
+### Admin
+- `GET /admin/` - Admin dashboard
+- `GET /admin/users` - User management
+- `GET /admin/resources` - Resource management
+- `GET /admin/bookings` - Booking oversight
+- `GET /admin/reviews` - Review moderation
+
+---
+
+## 🎨 User Interface
+
+The application features a modern, responsive design built with Bootstrap 5:
+
+- **Homepage**: Hero section with search, featured resources, categories
+- **Resource Listing**: Grid/list view with filters and sorting
+- **Resource Details**: Full information, booking interface, reviews
+- **Dashboard**: Personalized view of resources, bookings, and messages
+- **Admin Panel**: Comprehensive system management interface
+
+### Accessibility Features
+
+- Semantic HTML5 structure
+- ARIA labels and roles
+- Keyboard navigation support
+- Color contrast compliance
+- Responsive design (mobile-friendly)
+
+---
+
+## 📈 Project Management
+
+### Development Timeline (18 Days)
+
+- **Days 1-3**: Planning & Setup
+- **Days 4-6**: Database & Auth
+- **Days 7-9**: Resource CRUD & Search
+- **Days 10-12**: Booking Logic & Messaging
+- **Days 13-14**: Frontend Polish
+- **Days 15**: Testing & Security
+- **Days 16**: Documentation
+- **Days 17**: Deployment Prep
+- **Day 18**: Presentation
+
+### Team Roles
+
+- **Product Lead / PM**: Requirements, prioritization, demo
+- **Backend Engineer**: Database, API, authentication, deployment
+- **Frontend Engineer / UX**: Templates, components, accessibility
+- **Quality & DevOps / Security**: Testing, CI/CD, security audits
+
+---
+
+## 🚢 Deployment
+
+### Local Development
+
+```bash
+python run.py
+```
+
+### Production Deployment (Optional)
+
+The application is ready for deployment to:
+- Heroku
+- AWS Elastic Beanstalk
+- Google Cloud Platform
+- Microsoft Azure
+
+**Environment Variables for Production:**
+
+```
+SECRET_KEY=your-secure-secret-key
+DATABASE_URL=postgresql://... (if using PostgreSQL)
+FLASK_ENV=production
+```
+
+---
+
+## 📚 Additional Documentation
+
+- **Product Requirements Document**: `docs/context/PM/prd.md`
+- **User Personas**: `docs/context/DT/personas.md`
+- **Glossary**: `docs/context/shared/glossary.md`
+- **AI Development Notes**: `.prompt/dev_notes.md`
+- **Golden Prompts**: `.prompt/golden_prompts.md`
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is developed for educational purposes as part of the MSIS AiDD course.
+
+---
+
+## 👨‍💻 Team Members
+
+- [Your Name] - Product Lead
+- [Team Member 2] - Backend Engineer
+- [Team Member 3] - Frontend Engineer
+- [Team Member 4] - QA & Security
+
+---
+
+## 🙏 Acknowledgments
+
+- Indiana University Kelley School of Business
+- AiDD Course Instructors
+- Open-source community (Flask, Bootstrap, SQLite)
+- AI development tools (Cursor, GitHub Copilot)
+
+---
+
+## 📞 Support
+
+For questions or issues:
+- Create an issue in the GitHub repository
+- Contact team members via university email
+- Consult course instructors
+
+---
+
+**Built with ❤️ using AI-First Development practices**
+
+*Campus Resource Hub - Connecting the University Community*

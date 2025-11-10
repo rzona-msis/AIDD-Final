@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-person-circle"></i> Profile Settings</h1>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.department.label(class="form-label") }}
+                            {{ form.department(class="form-control") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control" value="{{ current_user.email }}" disabled>
+                            <small class="text-muted">Email cannot be changed</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <input type="text" class="form-control" value="{{ current_user.role|title }}" disabled>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Security</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('dashboard.change_password') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-key"></i> Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Account Information</h5>
+                    <p><strong>Member Since:</strong><br>{{ current_user.created_at }}</p>
+                    <p><strong>Status:</strong><br>
+                        <span class="badge bg-success">Active</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
