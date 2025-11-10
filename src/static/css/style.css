@@ -1,0 +1,616 @@
+/**
+ * Campus Resource Hub - Indiana University Theme
+ * Professional & Academic Design
+ * Colors: IU Cream & Crimson
+ */
+
+/* ============================================
+   Color Palette - Indiana University Brand
+   ============================================ */
+:root {
+    /* IU Primary Colors */
+    --iu-crimson: #990000;
+    --iu-crimson-dark: #7C0000;
+    --iu-cream: #EFEAE4;
+    --iu-cream-light: #F7F2ED;
+    
+    /* Supporting Colors */
+    --iu-gray: #666666;
+    --iu-gray-light: #CCCCCC;
+    --iu-gray-dark: #333333;
+    --white: #FFFFFF;
+    
+    /* Accent Colors for Status */
+    --success: #2D6A4F;
+    --warning: #C17817;
+    --danger: #990000;
+    --info: #2C4F82;
+    
+    /* Typography */
+    --font-primary: 'Georgia', 'Times New Roman', serif;
+    --font-secondary: 'Helvetica Neue', Arial, sans-serif;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   Global Styles
+   ============================================ */
+body {
+    font-family: var(--font-secondary);
+    background-color: var(--iu-cream-light);
+    color: var(--iu-gray-dark);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+    color: var(--iu-crimson);
+    font-weight: 600;
+}
+
+a {
+    color: var(--iu-crimson);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--iu-crimson-dark);
+    text-decoration: underline;
+}
+
+/* ============================================
+   Navigation Bar
+   ============================================ */
+.navbar {
+    background: linear-gradient(135deg, var(--iu-crimson) 0%, var(--iu-crimson-dark) 100%);
+    box-shadow: var(--shadow-md);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--iu-cream) !important;
+    letter-spacing: 0.5px;
+}
+
+.navbar-brand:hover {
+    color: var(--white) !important;
+}
+
+.nav-link {
+    color: var(--iu-cream) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white) !important;
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: var(--shadow-lg);
+    border-radius: 8px;
+}
+
+.dropdown-item:hover {
+    background-color: var(--iu-cream);
+    color: var(--iu-crimson);
+}
+
+/* ============================================
+   Hero Section
+   ============================================ */
+.hero-section {
+    background: linear-gradient(135deg, var(--iu-crimson) 0%, var(--iu-crimson-dark) 100%);
+    color: var(--iu-cream);
+    padding: 4rem 0;
+    border-bottom: 4px solid var(--iu-cream);
+    box-shadow: var(--shadow-lg);
+}
+
+.hero-section h1 {
+    color: var(--iu-cream);
+    font-size: 3rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-section p.lead {
+    color: var(--iu-cream-light);
+    font-size: 1.2rem;
+}
+
+.hero-section .btn-light {
+    background-color: var(--iu-cream);
+    color: var(--iu-crimson);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.hero-section .btn-light:hover {
+    background-color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.hero-section .btn-outline-light {
+    border: 2px solid var(--iu-cream);
+    color: var(--iu-cream);
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.hero-section .btn-outline-light:hover {
+    background-color: var(--iu-cream);
+    color: var(--iu-crimson);
+}
+
+/* ============================================
+   Cards
+   ============================================ */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    background-color: var(--white);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    border-bottom: 3px solid var(--iu-crimson-dark);
+    padding: 1rem 1.5rem;
+}
+
+.card-footer {
+    background-color: var(--iu-cream-light);
+    border-top: 1px solid var(--iu-gray-light);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.btn-primary {
+    background-color: var(--iu-crimson);
+    border: none;
+    color: var(--iu-cream);
+    font-weight: 600;
+    padding: 0.625rem 1.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background-color: var(--iu-crimson-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--white);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--iu-crimson);
+    color: var(--iu-crimson);
+    font-weight: 600;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+    border-color: var(--iu-crimson);
+}
+
+.btn-success {
+    background-color: var(--success);
+    border: none;
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    border: none;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    border: none;
+}
+
+/* ============================================
+   Badges & Labels
+   ============================================ */
+.badge {
+    font-weight: 600;
+    padding: 0.5em 0.75em;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.badge.bg-primary {
+    background-color: var(--iu-crimson) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--success) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--warning) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--danger) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--info) !important;
+}
+
+/* ============================================
+   Alerts
+   ============================================ */
+.alert {
+    border: none;
+    border-left: 4px solid;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-left-color: var(--success);
+    color: #155724;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-left-color: var(--info);
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-left-color: var(--warning);
+    color: #856404;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-left-color: var(--danger);
+    color: #721c24;
+}
+
+/* ============================================
+   Forms
+   ============================================ */
+.form-control, .form-select {
+    border: 2px solid var(--iu-gray-light);
+    border-radius: 6px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--iu-crimson);
+    box-shadow: 0 0 0 0.2rem rgba(153, 0, 0, 0.15);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--iu-gray-dark);
+    margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+.table {
+    background-color: var(--white);
+}
+
+.table thead {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--iu-cream-light);
+}
+
+/* ============================================
+   Rating Stars
+   ============================================ */
+.rating-stars {
+    color: var(--warning);
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+footer {
+    background-color: var(--iu-gray-dark);
+    color: var(--iu-cream);
+    padding: 3rem 0 1.5rem;
+    margin-top: 4rem;
+}
+
+footer h5, footer h6 {
+    color: var(--iu-cream);
+    font-family: var(--font-primary);
+}
+
+footer a {
+    color: var(--iu-cream-light);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--white);
+}
+
+footer hr {
+    border-color: var(--iu-gray);
+    margin: 1.5rem 0;
+}
+
+/* ============================================
+   Chat Interface (AI Assistant)
+   ============================================ */
+.chat-container {
+    border: 2px solid var(--iu-gray-light);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+}
+
+.chat-header {
+    background: linear-gradient(135deg, var(--iu-crimson) 0%, var(--iu-crimson-dark) 100%);
+    color: var(--iu-cream);
+}
+
+.message.user .message-bubble {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+}
+
+.message.assistant .message-bubble {
+    background-color: var(--white);
+    border: 2px solid var(--iu-cream);
+}
+
+.message-avatar {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+}
+
+.ai-badge {
+    background-color: var(--success);
+    color: var(--white);
+}
+
+.suggestion-chip {
+    background-color: var(--iu-cream);
+    border: 2px solid var(--iu-crimson);
+    color: var(--iu-crimson);
+}
+
+.suggestion-chip:hover {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+}
+
+/* ============================================
+   List Groups
+   ============================================ */
+.list-group-item {
+    border: 1px solid var(--iu-gray-light);
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: var(--iu-cream-light);
+    border-left: 4px solid var(--iu-crimson);
+}
+
+.list-group-item-action:hover {
+    background-color: var(--iu-cream);
+}
+
+/* ============================================
+   Breadcrumbs
+   ============================================ */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0.75rem 0;
+}
+
+.breadcrumb-item a {
+    color: var(--iu-crimson);
+}
+
+.breadcrumb-item.active {
+    color: var(--iu-gray);
+}
+
+/* ============================================
+   Pagination
+   ============================================ */
+.pagination .page-link {
+    color: var(--iu-crimson);
+    border: 1px solid var(--iu-gray-light);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--iu-cream);
+    color: var(--iu-crimson-dark);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--iu-crimson);
+    border-color: var(--iu-crimson);
+    color: var(--iu-cream);
+}
+
+/* ============================================
+   Modal Dialogs
+   ============================================ */
+.modal-header {
+    background-color: var(--iu-crimson);
+    color: var(--iu-cream);
+    border-bottom: 3px solid var(--iu-crimson-dark);
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-footer {
+    background-color: var(--iu-cream-light);
+}
+
+/* ============================================
+   Academic Styling Elements
+   ============================================ */
+.academic-header {
+    font-family: var(--font-primary);
+    color: var(--iu-crimson);
+    border-bottom: 3px solid var(--iu-crimson);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.professional-card {
+    background-color: var(--white);
+    border-left: 4px solid var(--iu-crimson);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+}
+
+.iu-divider {
+    height: 3px;
+    background: linear-gradient(90deg, var(--iu-crimson) 0%, var(--iu-cream) 100%);
+    border: none;
+    margin: 2rem 0;
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.text-crimson {
+    color: var(--iu-crimson) !important;
+}
+
+.text-cream {
+    color: var(--iu-cream) !important;
+}
+
+.bg-crimson {
+    background-color: var(--iu-crimson) !important;
+    color: var(--iu-cream) !important;
+}
+
+.bg-cream {
+    background-color: var(--iu-cream) !important;
+}
+
+.border-crimson {
+    border-color: var(--iu-crimson) !important;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section p.lead {
+        font-size: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+    .navbar, footer, .btn {
+        display: none;
+    }
+    
+    body {
+        background-color: white;
+        color: black;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* ============================================
+   Accessibility Enhancements
+   ============================================ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+:focus {
+    outline: 3px solid var(--iu-crimson);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --iu-crimson: #CC0000;
+        --iu-gray-dark: #000000;
+    }
+}
+
