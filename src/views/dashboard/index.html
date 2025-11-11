@@ -8,17 +8,15 @@
     
     <div class="row g-4 mb-4">
         <!-- Statistics Cards -->
-        {% if resource_stats %}
         <div class="col-md-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="bi bi-box fs-1 text-primary"></i>
-                    <h3 class="mt-2">{{ resource_stats.total_resources }}</h3>
+                    <h3 class="mt-2">{{ resource_stats.total_resources if resource_stats else 0 }}</h3>
                     <p class="text-muted mb-0">My Resources</p>
                 </div>
             </div>
         </div>
-        {% endif %}
         
         <div class="col-md-3">
             <div class="card text-center h-100">
@@ -34,18 +32,18 @@
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="bi bi-envelope fs-1 text-warning"></i>
-                    <h3 class="mt-2">{{ unread_messages }}</h3>
+                    <h3 class="mt-2">{{ unread_messages or 0 }}</h3>
                     <p class="text-muted mb-0">Unread Messages</p>
                 </div>
             </div>
         </div>
         
-        {% if pending_approvals %}
+        {% if current_user.is_staff() %}
         <div class="col-md-3">
             <div class="card text-center h-100 border-warning">
                 <div class="card-body">
                     <i class="bi bi-clock fs-1 text-warning"></i>
-                    <h3 class="mt-2">{{ pending_approvals|length }}</h3>
+                    <h3 class="mt-2">{{ pending_approvals|length if pending_approvals else 0 }}</h3>
                     <p class="text-muted mb-0">Pending Approvals</p>
                 </div>
             </div>

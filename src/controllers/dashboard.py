@@ -28,10 +28,8 @@ def index():
     my_bookings = BookingDAL.get_bookings_for_user(current_user.user_id, upcoming_only=True)
     unread_messages = MessageDAL.get_unread_count(current_user.user_id)
     
-    # Get resource statistics if user has resources
-    resource_stats = None
-    if my_resources:
-        resource_stats = ResourceDAL.get_resource_statistics(owner_id=current_user.user_id)
+    # Get resource statistics (always get stats, even if empty)
+    resource_stats = ResourceDAL.get_resource_statistics(owner_id=current_user.user_id)
     
     # Get booking statistics
     booking_stats = BookingDAL.get_booking_statistics(owner_id=current_user.user_id)
