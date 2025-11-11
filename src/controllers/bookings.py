@@ -47,6 +47,22 @@ def create_booking():
                 notes=form.notes.data
             )
             
+            # Send confirmation email
+            from src.services.email_service import EmailService
+            from src.data_access.user_dal import UserDAL
+            booking = BookingDAL.get_booking_by_id(booking_id)
+            user = UserDAL.get_user_by_id(current_user.user_id)
+            if booking and user:
+                booking_details = {
+                    'start_time': form.start_datetime.data.strftime('%B %d, %Y at %I:%M %p'),
+                    'end_time': form.end_datetime.data.strftime('%B %d, %Y at %I:%M %p'),
+                    'status': status,
+                    'dashboard_url': url_for('dashboard.index', _external=True)
+                }
+                EmailService.send_booking_confirmation(
+                    user['email'], user['name'], resource['title'], booking_details
+                )
+            
             if status == 'approved':
                 flash('Booking confirmed! You can view it in your dashboard.', 'success')
             else:
@@ -129,6 +145,23 @@ def approve_booking(booking_id):
             BookingDAL.update_booking_status(booking_id, 'approved')
             flash('Booking approved successfully!', 'success')
             
+            # Send approval email notification
+            from src.services.email_service import EmailService
+            from src.data_access.user_dal import UserDAL
+            from src.data_access.resource_dal import ResourceDAL
+            requester = UserDAL.get_user_by_id(booking['requester_id'])
+            resource = ResourceDAL.get_resource_by_id(booking['resource_id'])
+            if requester and resource:
+                booking_details = {
+                    'start_time': datetime.fromisoformat(booking['start_datetime']).strftime('%B %d, %Y at %I:%M %p'),
+                    'end_time': datetime.fromisoformat(booking['end_datetime']).strftime('%B %d, %Y at %I:%M %p'),
+                    'location': resource.get('location', 'TBD'),
+                    'dashboard_url': url_for('dashboard.my_bookings', _external=True)
+                }
+                EmailService.send_booking_approval(
+                    requester['email'], requester['name'], resource['title'], booking_details
+                )
+            
             # Create Google Calendar event if user has connected their calendar
             from src.services.google_calendar_service import calendar_service
             from src.data_access.user_dal import UserDAL
@@ -207,6 +240,22 @@ def reject_booking(booking_id):
         BookingDAL.update_booking_status(booking_id, 'rejected')
         flash('Booking rejected.', 'info')
         
+        # Send rejection email notification
+        from src.services.email_service import EmailService
+        from src.data_access.user_dal import UserDAL
+        from src.data_access.resource_dal import ResourceDAL
+        requester = UserDAL.get_user_by_id(booking['requester_id'])
+        resource = ResourceDAL.get_resource_by_id(booking['resource_id'])
+        if requester and resource:
+            booking_details = {
+                'start_time': datetime.fromisoformat(booking['start_datetime']).strftime('%B %d, %Y at %I:%M %p'),
+                'resource_url': url_for('resources.view_resource', resource_id=resource['resource_id'], _external=True)
+            }
+            reason = request.form.get('reason', 'Not specified')
+            EmailService.send_booking_rejection(
+                requester['email'], requester['name'], resource['title'], booking_details, reason
+            )
+        
         # Log admin action if admin
         if current_user.is_admin():
             from src.data_access.admin_dal import AdminDAL
@@ -247,6 +296,43 @@ def cancel_booking(booking_id):
     try:
         BookingDAL.update_booking_status(booking_id, 'cancelled')
         flash('Booking cancelled successfully.', 'success')
+        
+        # Send cancellation email notification
+        from src.services.email_service import EmailService
+        from src.data_access.resource_dal import ResourceDAL
+        resource = ResourceDAL.get_resource_by_id(booking['resource_id'])
+        if resource:
+            booking_details = {
+                'start_time': datetime.fromisoformat(booking['start_datetime']).strftime('%B %d, %Y at %I:%M %p'),
+                'browse_url': url_for('resources.list_resources', _external=True)
+            }
+            EmailService.send_booking_cancellation(
+                current_user.email, current_user.name, resource['title'], booking_details
+            )
+        
+        # Notify next person on waitlist
+        from src.data_access.waitlist_dal import WaitlistDAL
+        next_person = WaitlistDAL.notify_next_in_waitlist(
+            booking['resource_id'], 
+            booking['start_datetime']
+        )
+        
+        if next_person:
+            # Send waitlist notification email
+            booking_details = {
+                'start_time': datetime.fromisoformat(booking['start_datetime']).strftime('%B %d, %Y at %I:%M %p'),
+                'booking_url': url_for('bookings.create_booking', 
+                                      resource_id=booking['resource_id'],
+                                      start=booking['start_datetime'],
+                                      _external=True)
+            }
+            EmailService.send_waitlist_notification(
+                next_person['email'], 
+                next_person['name'], 
+                resource['title'], 
+                booking_details
+            )
+            flash(f'✓ {next_person["name"]} has been notified from the waitlist.', 'info')
     except Exception as e:
         flash(f'Error cancelling booking: {str(e)}', 'danger')
     

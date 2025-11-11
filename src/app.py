@@ -22,6 +22,7 @@ from src.controllers.ai_chatbot import ai_chatbot_bp
 from src.controllers.google_calendar import google_calendar_bp
 from src.controllers.analytics import analytics_bp
 from src.controllers.analytics_export import export_bp
+from src.controllers.waitlist import waitlist_bp
 
 # Import models
 from src.data_access.user_dal import UserDAL
@@ -43,12 +44,25 @@ def create_app():
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
     
+    # Email configuration
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@campushub.edu')
+    app.config['MAIL_SUPPRESS_SEND'] = os.environ.get('MAIL_SUPPRESS_SEND', 'true').lower() == 'true'  # Suppress in dev
+    
     # Initialize Flask-Login
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'warning'
+    
+    # Initialize Flask-Mail
+    from src.services.email_service import init_mail
+    init_mail(app)
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -70,6 +84,7 @@ def create_app():
     app.register_blueprint(google_calendar_bp, url_prefix='/calendar')
     app.register_blueprint(analytics_bp, url_prefix='/analytics')
     app.register_blueprint(export_bp, url_prefix='/analytics/export')
+    app.register_blueprint(waitlist_bp, url_prefix='/waitlist')
     
     # Context processors - make variables available to all templates
     @app.context_processor
@@ -120,6 +135,11 @@ def create_app():
     @app.route('/health')
     def health_check():
         return {'status': 'healthy', 'app': 'Campus Resource Hub'}, 200
+    
+    # Test form endpoint
+    @app.route('/test-form')
+    def test_form():
+        return render_template('test_form.html')
     
     return app
 

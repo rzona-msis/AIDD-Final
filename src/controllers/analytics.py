@@ -11,6 +11,7 @@ from flask import Blueprint, jsonify, render_template, request, flash, redirect,
 from flask_login import login_required, current_user
 from functools import wraps
 from src.services.google_cloud_analytics import cloud_analytics
+from src.data_access.analytics_dal import AnalyticsDAL
 from datetime import datetime
 
 analytics_bp = Blueprint('analytics', __name__)
@@ -41,6 +42,42 @@ def dashboard():
     return render_template('analytics/dashboard.html',
                          metrics=metrics,
                          is_gcp_enabled=is_gcp_enabled)
+
+
+@analytics_bp.route('/daily')
+@login_required
+@admin_required
+def daily_analytics():
+    """
+    Daily booking analytics dashboard.
+    
+    Admin-only access. Shows comprehensive booking metrics, resource usage, and operational insights.
+    """
+    
+    try:
+        # Get all analytics data
+        daily_metrics = AnalyticsDAL.get_daily_booking_metrics(days=30)
+        timeline_data = AnalyticsDAL.get_booking_timeline(days=30)
+        resource_stats = AnalyticsDAL.get_resource_usage_stats()
+        peak_hours = AnalyticsDAL.get_peak_hours_data()
+        day_distribution = AnalyticsDAL.get_day_of_week_distribution()
+        user_activity = AnalyticsDAL.get_user_activity_stats()
+        operational = AnalyticsDAL.get_operational_insights()
+        lead_time = AnalyticsDAL.get_booking_lead_time_stats()
+        
+        return render_template('analytics/daily_dashboard.html',
+                             daily_metrics=daily_metrics,
+                             timeline_data=timeline_data,
+                             resource_stats=resource_stats,
+                             peak_hours=peak_hours,
+                             day_distribution=day_distribution,
+                             user_activity=user_activity,
+                             operational=operational,
+                             lead_time=lead_time,
+                             now=datetime.now())
+    except Exception as e:
+        flash(f'Error loading analytics: {str(e)}', 'danger')
+        return redirect(url_for('dashboard.index'))
 
 
 @analytics_bp.route('/api/metrics', methods=['GET'])

@@ -15,7 +15,7 @@ class ResourceDAL:
     
     @staticmethod
     def create_resource(owner_id, title, description=None, category=None, location=None,
-                       capacity=None, images=None, availability_rules=None, 
+                       image_url=None, capacity=None, images=None, availability_rules=None, 
                        status='draft', requires_approval=0):
         """
         Create a new resource listing.
@@ -26,6 +26,7 @@ class ResourceDAL:
             description (str, optional): Detailed description
             category (str, optional): Resource category
             location (str, optional): Physical location
+            image_url (str, optional): URL to resource image
             capacity (int, optional): Maximum capacity
             images (str, optional): Comma-separated image paths or JSON
             availability_rules (str, optional): JSON availability rules
@@ -40,10 +41,10 @@ class ResourceDAL:
         
         cursor.execute("""
             INSERT INTO resources 
-            (owner_id, title, description, category, location, capacity, images, 
+            (owner_id, title, description, category, location, image_url, capacity, images, 
              availability_rules, status, requires_approval)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (owner_id, title, description, category, location, capacity, images,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (owner_id, title, description, category, location, image_url, capacity, images,
               availability_rules, status, requires_approval))
         
         resource_id = cursor.lastrowid
@@ -184,7 +185,7 @@ class ResourceDAL:
         Returns:
             bool: True if update successful
         """
-        allowed_fields = ['title', 'description', 'category', 'location', 'capacity',
+        allowed_fields = ['title', 'description', 'category', 'location', 'image_url', 'capacity',
                          'images', 'availability_rules', 'status', 'requires_approval']
         update_fields = {k: v for k, v in kwargs.items() if k in allowed_fields}
         

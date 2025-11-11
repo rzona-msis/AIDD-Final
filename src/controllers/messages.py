@@ -23,7 +23,17 @@ def list_threads():
     """
     threads = MessageDAL.get_user_threads(current_user.user_id)
     
-    return render_template('messages/list.html', threads=threads)
+    # Get all users for compose dropdown (excluding current user)
+    all_users = UserDAL.get_all_users()
+    available_users = [user for user in all_users if user['user_id'] != current_user.user_id]
+    
+    # Create form for composing new message
+    form = MessageForm()
+    
+    return render_template('messages/list.html', 
+                         threads=threads, 
+                         available_users=available_users,
+                         form=form)
 
 
 @messages_bp.route('/thread/<thread_id>')
@@ -71,10 +81,38 @@ def send_message():
     
     Can be sent from thread view or initiate new conversation.
     """
-    form = MessageForm()
+    # Debug: Print ALL form data
+    print("=" * 80)
+    print("SEND MESSAGE ROUTE CALLED")
+    print("All form data received:")
+    for key, value in request.form.items():
+        print(f"  {key}: {value}")
+    print("=" * 80)
     
-    if form.validate_on_submit():
-        receiver_id = int(form.receiver_id.data)
+    # Get data directly from request
+    receiver_id = request.form.get('receiver_id')
+    content = request.form.get('content')
+    booking_id = request.form.get('booking_id')
+    
+    print(f"Extracted - receiver_id: '{receiver_id}', content: '{content}', booking_id: '{booking_id}'")
+    
+    # Validate receiver_id
+    if not receiver_id or receiver_id.strip() == '':
+        print(f"VALIDATION FAILED: receiver_id is empty or None")
+        flash('Please select a recipient.', 'danger')
+        return redirect(request.referrer or url_for('messages.list_threads'))
+    
+    # Validate content
+    if not content or not content.strip():
+        flash('Message content is required.', 'danger')
+        return redirect(request.referrer or url_for('messages.list_threads'))
+    
+    if len(content) > 1000:
+        flash('Message must be less than 1000 characters.', 'danger')
+        return redirect(request.referrer or url_for('messages.list_threads'))
+    
+    try:
+        receiver_id = int(receiver_id)
         
         # Verify receiver exists
         receiver = UserDAL.get_user_by_id(receiver_id)
@@ -82,32 +120,33 @@ def send_message():
             flash('Recipient not found.', 'danger')
             return redirect(url_for('messages.list_threads'))
         
-        try:
-            booking_id = int(form.booking_id.data) if form.booking_id.data else None
-            
-            # Send message
-            MessageDAL.send_message(
-                sender_id=current_user.user_id,
-                receiver_id=receiver_id,
-                content=form.content.data,
-                booking_id=booking_id
-            )
-            
-            # Generate thread_id for redirect
-            thread_id = f"{min(current_user.user_id, receiver_id)}_{max(current_user.user_id, receiver_id)}"
-            if booking_id:
-                thread_id += f"_b{booking_id}"
-            
-            flash('Message sent successfully!', 'success')
-            return redirect(url_for('messages.view_thread', thread_id=thread_id))
-            
-        except Exception as e:
-            flash(f'Error sending message: {str(e)}', 'danger')
-    
-    else:
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f'{field}: {error}', 'danger')
+        # Don't allow messaging yourself
+        if receiver_id == current_user.user_id:
+            flash('You cannot send messages to yourself.', 'warning')
+            return redirect(url_for('messages.list_threads'))
+        
+        booking_id = int(booking_id) if booking_id else None
+        
+        # Send message
+        MessageDAL.send_message(
+            sender_id=current_user.user_id,
+            receiver_id=receiver_id,
+            content=content.strip(),
+            booking_id=booking_id
+        )
+        
+        # Generate thread_id for redirect
+        thread_id = f"{min(current_user.user_id, receiver_id)}_{max(current_user.user_id, receiver_id)}"
+        if booking_id:
+            thread_id += f"_b{booking_id}"
+        
+        flash('Message sent successfully!', 'success')
+        return redirect(url_for('messages.view_thread', thread_id=thread_id))
+        
+    except ValueError:
+        flash('Invalid recipient ID.', 'danger')
+    except Exception as e:
+        flash(f'Error sending message: {str(e)}', 'danger')
     
     return redirect(request.referrer or url_for('messages.list_threads'))
 

@@ -420,4 +420,150 @@ class BookingDAL:
         conn.close()
         
         return success
+    
+    @staticmethod
+    def create_recurring_bookings(resource_id, requester_id, start_datetime, end_datetime,
+                                  status, notes, recurrence_pattern, recurrence_end_date):
+        """
+        Create a series of recurring bookings.
+        
+        Args:
+            resource_id: Resource ID
+            requester_id: User ID
+            start_datetime: Initial start time
+            end_datetime: Initial end time
+            status: Booking status
+            notes: Booking notes
+            recurrence_pattern: 'daily', 'weekly', 'monthly'
+            recurrence_end_date: When to stop creating recurrences
+            
+        Returns:
+            list: List of created booking IDs
+        """
+        from datetime import datetime, timedelta
+        
+        booking_ids = []
+        current_start = datetime.fromisoformat(start_datetime)
+        current_end = datetime.fromisoformat(end_datetime)
+        end_date = datetime.fromisoformat(recurrence_end_date)
+        
+        # Calculate duration
+        duration = current_end - current_start
+        
+        # Determine increment based on pattern
+        if recurrence_pattern == 'daily':
+            increment = timedelta(days=1)
+        elif recurrence_pattern == 'weekly':
+            increment = timedelta(weeks=1)
+        elif recurrence_pattern == 'monthly':
+            increment = timedelta(days=30)  # Approximate month
+        else:
+            raise ValueError(f"Invalid recurrence pattern: {recurrence_pattern}")
+        
+        # Create first booking as parent
+        parent_id = BookingDAL.create_booking(
+            resource_id, requester_id,
+            current_start.isoformat(),
+            current_end.isoformat(),
+            status, notes
+        )
+        
+        # Mark as recurring
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE bookings
+            SET is_recurring = 1, recurrence_pattern = ?, recurrence_end_date = ?
+            WHERE booking_id = ?
+        """, (recurrence_pattern, recurrence_end_date, parent_id))
+        conn.commit()
+        conn.close()
+        
+        booking_ids.append(parent_id)
+        
+        # Create subsequent bookings
+        current_start += increment
+        current_end += increment
+        
+        while current_start <= end_date:
+            try:
+                # Check for conflicts
+                if not BookingDAL.has_conflict(resource_id, 
+                                              current_start.isoformat(), 
+                                              current_end.isoformat()):
+                    booking_id = BookingDAL._create_child_booking(
+                        resource_id, requester_id,
+                        current_start.isoformat(),
+                        current_end.isoformat(),
+                        status, notes, parent_id,
+                        recurrence_pattern, recurrence_end_date
+                    )
+                    booking_ids.append(booking_id)
+            except Exception as e:
+                print(f"Skipping conflicting booking: {e}")
+            
+            current_start += increment
+            current_end += increment
+        
+        return booking_ids
+    
+    @staticmethod
+    def _create_child_booking(resource_id, requester_id, start_datetime, end_datetime,
+                             status, notes, parent_booking_id, recurrence_pattern, recurrence_end_date):
+        """Create a child booking in a recurring series."""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO bookings 
+            (resource_id, requester_id, start_datetime, end_datetime, status, notes,
+             is_recurring, recurrence_pattern, recurrence_end_date, parent_booking_id)
+            VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+        """, (resource_id, requester_id, start_datetime, end_datetime, status, notes,
+              recurrence_pattern, recurrence_end_date, parent_booking_id))
+        
+        booking_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return booking_id
+    
+    @staticmethod
+    def get_recurring_series(parent_booking_id):
+        """Get all bookings in a recurring series."""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get parent and all children
+        cursor.execute("""
+            SELECT * FROM bookings
+            WHERE booking_id = ? OR parent_booking_id = ?
+            ORDER BY start_datetime ASC
+        """, (parent_booking_id, parent_booking_id))
+        
+        bookings = cursor.fetchall()
+        conn.close()
+        
+        return [dict(booking) for booking in bookings]
+    
+    @staticmethod
+    def cancel_recurring_series(parent_booking_id, user_id):
+        """Cancel all future bookings in a recurring series."""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Cancel parent and all future children
+        cursor.execute("""
+            UPDATE bookings
+            SET status = 'cancelled'
+            WHERE (booking_id = ? OR parent_booking_id = ?)
+            AND requester_id = ?
+            AND datetime(start_datetime) >= datetime('now')
+        """, (parent_booking_id, parent_booking_id, user_id))
+        
+        cancelled_count = cursor.rowcount
+        conn.commit()
+        conn.close()
+        
+        return cancelled_count
 

@@ -40,6 +40,7 @@ def init_database():
     cursor.execute("DROP TABLE IF EXISTS admin_logs")
     cursor.execute("DROP TABLE IF EXISTS reviews")
     cursor.execute("DROP TABLE IF EXISTS messages")
+    cursor.execute("DROP TABLE IF EXISTS waitlist")
     cursor.execute("DROP TABLE IF EXISTS bookings")
     cursor.execute("DROP TABLE IF EXISTS resources")
     cursor.execute("DROP TABLE IF EXISTS users")
@@ -70,6 +71,7 @@ def init_database():
             description TEXT,
             category TEXT,
             location TEXT,
+            image_url TEXT,
             capacity INTEGER,
             images TEXT,
             availability_rules TEXT,
@@ -92,10 +94,31 @@ def init_database():
                 CHECK(status IN ('pending', 'approved', 'rejected', 'cancelled', 'completed')),
             notes TEXT,
             calendar_event_id TEXT,
+            is_recurring INTEGER DEFAULT 0,
+            recurrence_pattern TEXT,
+            recurrence_end_date DATETIME,
+            parent_booking_id INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (resource_id) REFERENCES resources(resource_id) ON DELETE CASCADE,
-            FOREIGN KEY (requester_id) REFERENCES users(user_id) ON DELETE CASCADE
+            FOREIGN KEY (requester_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
+        )
+    """)
+    
+    # Create waitlist table
+    cursor.execute("""
+        CREATE TABLE waitlist (
+            waitlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resource_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            requested_datetime DATETIME NOT NULL,
+            status TEXT NOT NULL DEFAULT 'waiting' CHECK(status IN ('waiting', 'notified', 'expired', 'converted')),
+            priority INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            notified_at DATETIME,
+            FOREIGN KEY (resource_id) REFERENCES resources(resource_id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
         )
     """)
     
@@ -158,6 +181,10 @@ def init_database():
     cursor.execute("CREATE INDEX idx_bookings_requester ON bookings(requester_id)")
     cursor.execute("CREATE INDEX idx_bookings_datetime ON bookings(start_datetime, end_datetime)")
     cursor.execute("CREATE INDEX idx_bookings_status ON bookings(status)")
+    cursor.execute("CREATE INDEX idx_waitlist_resource ON waitlist(resource_id)")
+    cursor.execute("CREATE INDEX idx_waitlist_user ON waitlist(user_id)")
+    cursor.execute("CREATE INDEX idx_waitlist_status ON waitlist(status)")
+    cursor.execute("CREATE INDEX idx_waitlist_datetime ON waitlist(requested_datetime)")
     cursor.execute("CREATE INDEX idx_messages_thread ON messages(thread_id)")
     cursor.execute("CREATE INDEX idx_messages_receiver ON messages(receiver_id)")
     cursor.execute("CREATE INDEX idx_reviews_resource ON reviews(resource_id)")
@@ -193,27 +220,33 @@ def seed_sample_data():
             (name, email, password_hash, role, dept)
         )
     
-    # Create sample resources
+    # Create sample resources with relevant themed images
     resources = [
         (2, 'Conference Room A', 'Modern conference room with video conferencing', 'Meeting Room', 
-         'Business Building, Floor 3', 12, '', '{"weekdays": "8am-8pm"}', 'published', 1),
+         'Business Building, Floor 3', 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop', 
+         12, '', '{"weekdays": "8am-8pm"}', 'published', 1),
         (2, 'Study Room 101', 'Quiet individual study space', 'Study Room', 
-         'Library, Floor 1', 1, '', '{"24/7": true}', 'published', 0),
+         'Library, Floor 1', 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=600&fit=crop', 
+         1, '', '{"24/7": true}', 'published', 0),
         (2, '4K Video Camera Kit', 'Professional camera with tripod and accessories', 'Equipment', 
-         'Media Center', 1, '', '{"weekdays": "9am-5pm"}', 'published', 1),
-        (5, 'Physics Lab Station', 'Equipped workstation with oscilloscope and tools', 'Lab Space', 
-         'Science Building, Room 204', 2, '', '{"weekdays": "8am-10pm"}', 'published', 1),
+         'Media Center', 'https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&h=600&fit=crop', 
+         1, '', '{"weekdays": "9am-5pm"}', 'published', 1),
+        (5, 'Computer Lab Station', 'High-performance workstation with dual monitors and software suite', 'Lab Space', 
+         'Technology Building, Room 204', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop', 
+         2, '', '{"weekdays": "8am-10pm"}', 'published', 1),
         (3, 'Group Study Space', 'Collaborative workspace with whiteboard', 'Study Room', 
-         'Library, Floor 2', 8, '', '{"always": true}', 'published', 0),
+         'Library, Floor 2', 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop', 
+         8, '', '{"always": true}', 'published', 0),
         (2, 'Projector & Screen', 'HD projector with portable screen', 'Equipment', 
-         'Media Center', 1, '', '{"weekdays": "9am-5pm"}', 'published', 1),
+         'Media Center', 'https://images.unsplash.com/photo-1583321500900-82807e458f3c?w=800&h=600&fit=crop', 
+         1, '', '{"weekdays": "9am-5pm"}', 'published', 1),
     ]
     
     for resource in resources:
         cursor.execute("""
-            INSERT INTO resources (owner_id, title, description, category, location, capacity, 
-                                 images, availability_rules, status, requires_approval)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO resources (owner_id, title, description, category, location, image_url,
+                                 capacity, images, availability_rules, status, requires_approval)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, resource)
     
     # Create sample bookings
