@@ -12,7 +12,7 @@ from datetime import datetime
 import os
 
 
-DATABASE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'campus_hub.db')
+DATABASE_PATH = os.environ.get('DATABASE_PATH', os.path.join(os.path.dirname(os.path.dirname(__file__)), 'campus_hub.db'))
 
 
 def get_db_connection():
