@@ -141,7 +141,14 @@ def profile():
     # Check if user has Google Calendar connected
     has_calendar = UserDAL.has_calendar_connected(current_user.user_id)
     
-    return render_template('dashboard/profile.html', form=form, has_calendar=has_calendar)
+    # Check if Google Calendar integration is enabled on server
+    from src.services.google_calendar_service import calendar_service
+    calendar_enabled = calendar_service.is_enabled()
+    
+    return render_template('dashboard/profile.html', 
+                         form=form, 
+                         has_calendar=has_calendar,
+                         calendar_enabled=calendar_enabled)
 
 
 @dashboard_bp.route('/change-password', methods=['GET', 'POST'])

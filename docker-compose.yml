@@ -22,6 +22,9 @@ services:
       - GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID}
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-http://localhost:8080/calendar/callback}
     volumes:
       - ./src/campus_hub.db:/app/src/campus_hub.db
       - ./logs:/app/logs
