@@ -28,15 +28,112 @@ class ResourceConcierge:
     def __init__(self):
         """Initialize the AI concierge with Gemini API credentials."""
         self.api_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
+        # Use latest stable model - gemini-pro works with newer SDK (0.8+)
         self.model_name = os.environ.get('GEMINI_MODEL', 'gemini-pro')
         
         if GEMINI_AVAILABLE and self.api_key:
             try:
                 genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel(self.model_name)
+                
+                # List available models and use the first one that supports generateContent
+                try:
+                    available_models = genai.list_models()
+                    model_initialized = False
+                    
+                    # Try to find a model that supports generateContent
+                    # Prefer stable models over experimental ones (avoid -exp, -preview)
+                    stable_models = []
+                    other_models = []
+                    
+                    for model in available_models:
+                        if 'generateContent' in model.supported_generation_methods:
+                            model_name = model.name
+                            # Skip experimental models (they have no free tier quota)
+                            if '-exp' in model_name or 'experimental' in model_name.lower():
+                                continue
+                            # Prefer stable models (no -preview)
+                            if '-preview' not in model_name:
+                                stable_models.append(model)
+                            else:
+                                other_models.append(model)
+                    
+                    # Try stable models first
+                    for model in stable_models:
+                        try:
+                            self.model = genai.GenerativeModel(model.name)
+                            print(f"✓ Using Google Gemini AI ({model.name})")
+                            self.model_name = model.name
+                            model_initialized = True
+                            break
+                        except Exception as e:
+                            continue
+                    
+                    # If no stable model works, try preview models
+                    if not model_initialized:
+                        for model in other_models[:3]:  # Limit to first 3 preview models
+                            try:
+                                self.model = genai.GenerativeModel(model.name)
+                                print(f"✓ Using Google Gemini AI ({model.name})")
+                                self.model_name = model.name
+                                model_initialized = True
+                                break
+                            except Exception as e:
+                                continue
+                    
+                    if not model_initialized:
+                        # Fallback: try stable model names that actually exist
+                        models_to_try = [
+                            'models/gemini-2.5-flash',  # Fast, stable
+                            'models/gemini-2.5-pro',    # More capable
+                            'models/gemini-flash-latest', # Latest flash
+                            'models/gemini-pro-latest',  # Latest pro
+                        ]
+                        for model_name in models_to_try:
+                            try:
+                                self.model = genai.GenerativeModel(model_name)
+                                print(f"✓ Using Google Gemini AI ({model_name})")
+                                self.model_name = model_name
+                                model_initialized = True
+                                break
+                            except Exception as e:
+                                print(f"  Trying {model_name}... failed")
+                                continue
+                    
+                    if not model_initialized:
+                        print("❌ Failed to initialize any Gemini model")
+                        self.model = None
+                        self.enabled = False
+                        return
+                        
+                except Exception as e:
+                    print(f"Error listing models: {e}")
+                    # Fallback to known working models
+                    models_to_try = [
+                        'models/gemini-2.5-flash',
+                        'models/gemini-2.5-pro',
+                        'models/gemini-flash-latest',
+                    ]
+                    model_initialized = False
+                    for model_name in models_to_try:
+                        try:
+                            self.model = genai.GenerativeModel(model_name)
+                            print(f"✓ Using Google Gemini AI ({model_name} - fallback)")
+                            self.model_name = model_name
+                            model_initialized = True
+                            break
+                        except:
+                            continue
+                    
+                    if not model_initialized:
+                        print(f"❌ Failed to initialize Gemini: {e}")
+                        self.model = None
+                        self.enabled = False
+                        return
                 self.enabled = True
             except Exception as e:
-                print(f"Failed to initialize Gemini: {e}")
+                print(f"Failed to configure Gemini: {e}")
+                import traceback
+                traceback.print_exc()
                 self.model = None
                 self.enabled = False
         else:
@@ -109,12 +206,26 @@ class ResourceConcierge:
             }
             
         except Exception as e:
-            print(f"Gemini API error: {e}")
+            error_msg = str(e)
+            print(f"Gemini API error: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            
+            # Provide more helpful error message
+            if "404" in error_msg or "not found" in error_msg.lower():
+                error_response = "The AI model is temporarily unavailable. Please try again in a moment."
+            elif "quota" in error_msg.lower() or "limit" in error_msg.lower():
+                error_response = "AI service quota exceeded. Please try again later."
+            elif "api key" in error_msg.lower() or "authentication" in error_msg.lower():
+                error_response = "AI service authentication error. Please contact support."
+            else:
+                error_response = "I apologize, but I'm having trouble processing your request right now. Please try again."
+            
             return {
-                'response': "I apologize, but I'm having trouble processing your request right now.",
+                'response': error_response,
                 'resources': [],
                 'suggestions': [],
-                'error': str(e)
+                'error': error_msg
             }
     
     def _build_system_prompt(self, context):
@@ -357,8 +468,8 @@ def get_concierge():
     """
     concierge = ResourceConcierge()
     if concierge.is_enabled():
-        print("✓ Using Google Gemini AI")
+        # Message already printed in __init__
         return concierge
     else:
-        print("⚠ Using keyword-based fallback")
+        print("⚠ Using keyword-based fallback (Gemini not available)")
         return FallbackConcierge()
