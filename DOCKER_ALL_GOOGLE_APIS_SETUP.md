@@ -31,8 +31,8 @@ Your `.env` should have these sections (use `env.docker.template` as reference):
 
 ```bash
 # Google Calendar (already configured ✅)
-GOOGLE_CLIENT_ID=366276102829-q1rogvpgqh280bqlbqsteqr0fku1mrgn.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret-here
 GOOGLE_REDIRECT_URI=http://localhost:8080/calendar/callback
 
 # Gemini AI (add if using AI chatbot)
